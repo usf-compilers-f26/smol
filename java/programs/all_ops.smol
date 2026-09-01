@@ -1,0 +1,9 @@
+// Inputs 7 and 3 print 10, 4, 21, 2, 0, and -7.
+$read x
+$read y
+$print + x y
+$print - x y
+$print * x y
+$print / x y
+$print < x y
+$print ~ x

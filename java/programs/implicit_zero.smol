@@ -1,0 +1,4 @@
+// Variables are global and read as zero before their first assignment.
+$print never_assigned
+:= later 9
+$print later
