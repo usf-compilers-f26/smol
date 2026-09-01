@@ -1,0 +1,19 @@
+[package]
+name = "smol"
+version = "0.1.0"
+edition = "2021"
+default-run = "vm"
+
+[dependencies]
+clap = { version = "4.5", features = ["derive"] }
+derive_more = { version = "1.0.0", features = ["full"] }
+internment = "0.8.6"
+regex = "1.11.1"
+
+[[bin]]
+name = "smolc"
+path = "src/bin/smolc.rs"
+
+[[bin]]
+name = "vm"
+path = "src/bin/vm.rs"
