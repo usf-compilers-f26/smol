@@ -1,0 +1,5 @@
+// Select the larger of two values.
+$read x
+$read y
+$if < x y {:= result y} {:= result x}
+$print result
