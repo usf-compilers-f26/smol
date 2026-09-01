@@ -29,11 +29,17 @@ source code --[lex]--> tokens --[parse]--> AST --[lower]--> IR --[optimize]--> o
                                                                             riscv executable
 ```
 
-Here is where everything is found:
+- The rust/ directory contains the Rust version.
+- The java/ directory contains the Java version.
+- The python/ directory contains the Python version, developed throughout the lectures.
 
-TODO
+The Java and Python versions are derived from the Rust version.
 
 ## Libraries we are using
+
+For Python and Java, we are using the standard library.
+
+### Rust
 
 We use the following Rust crates both in the full CFlat compiler and in this compiler:
 - [`internment`](https://crates.io/crates/internment) is used for interning
