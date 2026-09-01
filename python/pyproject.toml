@@ -1,0 +1,31 @@
+[project]
+name = "smol"
+version = "0.1.0"
+description = "A tiny teaching compiler"
+requires-python = ">=3.14"
+dependencies = []
+
+[project.scripts]
+smol = "smol.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+    "ruff>=0.12.12",
+    "ty>=0.0.1a20",
+]
+
+[build-system]
+requires = ["uv_build>=0.8.14,<0.9.0"]
+build-backend = "uv_build"
+
+[tool.ruff]
+target-version = "py314"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+testpaths = ["tests"]

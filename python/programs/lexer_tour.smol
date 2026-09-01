@@ -1,0 +1,3 @@
+// Identifiers may contain underscores and trailing digits.
+:= value_007 00042
+$print value_007 // comments extend to the end of a line
