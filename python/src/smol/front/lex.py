@@ -75,18 +75,38 @@ class Lexer:
 
     def end_of_input(self) -> bool:
         """Return whether all input has been consumed."""
-        raise NotImplementedError(
-            "TODO: determine whether the lexer is at end of input"
-        )
+        return self.pos == len(self.source)
 
     def skip_whitespace(self) -> None:
         """Skip whitespace and line comments."""
-        raise NotImplementedError("TODO: skip whitespace and comments")
+        if self.end_of_input():
+            return
+        match = self._whitespace.match(self.source, self.pos)
+        if match:
+            self.pos += len(match.group())
 
     def next(self) -> Token | None:
         """Return the next token, or None at end of input."""
-        raise NotImplementedError("TODO: recognize and return the next token")
+        self.skip_whitespace()
+        if self.end_of_input():
+            return None
 
+        matches = [
+                (regex.match(self.source, self.pos), kind)
+                for regex, kind in self._matchers
+        ]
+
+        matches = [
+                (len(match.group()), kind, match.group())
+                for match, kind in matches
+                if match
+        ]
+
+        matches.sort(reverse=True)
+
+        if matches != []:
+            self.pos +=  matches[0][0]
+            return Token(kind=matches[0][1], text=matches[0][2])
 
 def get_tokens(source: str) -> list[Token]:
     lexer = Lexer(source)
