@@ -16,7 +16,7 @@
 
 """Recursive-descent parser for smol's prefix grammar."""
 
-from smol.front.ast import BOp, Expr, Program, Stmt
+from smol.front.ast import BOp, Expr, Program, Stmt, Assign, Print, Var, Const, BinOp, Negate
 from smol.front.lex import Token, TokenKind, get_tokens
 
 
@@ -34,37 +34,100 @@ def parse(source: str) -> Program:
         )
     return program
 
+class Inspector:
+    indent: int = 0
+
+    def __init__(self, name):
+        self.name = name
+        print(f"{' ' * Inspector.indent}parsing {name}")
+        Inspector.indent += 2
+
+    def __del__(self):
+        Inspector.indent -= 2
+        print(f"{' ' * Inspector.indent}parsed {self.name}")
+
 
 class Parser:
     def __init__(self, source: str) -> None:
         self.tokens = list(reversed(get_tokens(source)))
 
     def peek(self) -> Token | None:
+        """Return the next token if there is one, don't pop it."""
         return self.tokens[-1] if self.tokens else None
 
     def next(self) -> Token:
-        raise NotImplementedError("TODO: consume the next token")
+        """Return and pop the next token."""
+        t = self.peek()
+        if t is None:
+            raise ParseError("Reached the EOF too early.")
+        print(f"popped {self.tokens[-1]}")
+        self.tokens.pop()
+        return t
 
     def next_is(self, kind: TokenKind) -> bool:
-        raise NotImplementedError("TODO: test the next token's kind")
+        """Return whether the next token has the given kind."""
+        t = self.peek()
+        return t is not None and t.kind == kind
 
     def eat(self, kind: TokenKind) -> bool:
-        raise NotImplementedError("TODO: optionally consume a token")
+        """Consume the next token if it has the given kind."""
+        if self.next_is(kind):
+            self.next()  # just to pop the relevant token
+            return True
+        return False
 
     def expect(self, kind: TokenKind) -> Token:
-        raise NotImplementedError("TODO: consume a token of the expected kind")
+        """Assert that the next token is of the given kind and consume it."""
+        t = self.next()
+        if t.kind != kind:
+            raise ParseError(f"Expected a {kind}, got {t}.")
+        return t
 
     def parse_program(self) -> Program:
-        raise NotImplementedError("TODO: parse a program")
+        stmts = []
+        while self.tokens:
+            stmts.append(self.parse_stmt())
+        return Program(stmts)
 
     def parse_stmt(self) -> Stmt:
-        raise NotImplementedError("TODO: parse a statement")
+        _dbg = Inspector("stmt")
+        t = self.next()
+        if t.kind == TokenKind.ASSIGN:
+            lhs = self.expect(TokenKind.ID)
+            rhs = self.parse_expr()
+            return Assign(name=lhs.text, value=rhs)
+        if t.kind == TokenKind.PRINT:
+            return Print(self.parse_expr())
+        if t.kind == TokenKind.READ:
+            ...
+        if t.kind == TokenKind.IF:
+            ...
+        raise ParseError(f"Expected the start of a statement, got {t}")
 
     def parse_block(self) -> tuple[Stmt, ...]:
         raise NotImplementedError("TODO: parse a block")
 
     def parse_expr(self) -> Expr:
-        raise NotImplementedError("TODO: parse an expression")
+        _dbg = Inspector("expr")
+        if self.peek() in [TokenKind.ID, TokenKind.NUM, TokenKind.TILDE]:
+            t = self.next()
+            if t.kind == TokenKind.ID:
+                return Var(name=t.text)
+            if t.kind == TokenKind.NUM:
+                return Const(value=int(t.text))
+            if t.kind == TokenKind.TILDE:
+                return Negate(self.parse_expr())
+        
+        # this must be a bop
+        op = self.parse_bop()
+        lhs = self.parse_expr()
+        rhs = self.parse_expr()
+        return BinOp(op, lhs, rhs)
 
-    def parse_binop(self, op: BOp) -> Expr:
-        raise NotImplementedError(f"TODO: parse both operands of {op}")
+    def parse_bop(self) -> BOp:
+        _dbg = Inspector("bop")
+        if self.eat(TokenKind.PLUS):
+            return BOp.ADD
+        self.expect(TokenKind.MUL)
+        return BOp.MUL
+        
