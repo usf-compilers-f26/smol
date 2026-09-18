@@ -72,8 +72,8 @@ class Read:
 @dataclass(frozen=True, slots=True)
 class If:
     guard: Expr
-    true_branch: tuple[Stmt, ...]
-    false_branch: tuple[Stmt, ...]
+    true_branch: list[Stmt]
+    false_branch: list[Stmt]
 
 
 type Stmt = Assign | Print | Read | If
@@ -81,4 +81,4 @@ type Stmt = Assign | Print | Read | If
 
 @dataclass(frozen=True, slots=True)
 class Program:
-    statements: tuple[Stmt, ...]
+    statements: list[Stmt]
