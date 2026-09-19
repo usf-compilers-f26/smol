@@ -107,6 +107,10 @@ class Lexer:
             self.pos += matches[0][0]
             return Token(kind=matches[0][1], text=matches[0][2])
 
+        text = self.source[self.pos]
+        self.pos += 1
+        return Token(kind=TokenKind.ERROR, text=text)
+
 
 def get_tokens(source: str) -> list[Token]:
     lexer = Lexer(source)
