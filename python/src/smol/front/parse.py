@@ -16,6 +16,8 @@
 
 """Recursive-descent parser for smol's prefix grammar."""
 
+from typing import Any
+
 from smol.front.ast import (
     Assign,
     BinOp,
@@ -51,12 +53,16 @@ class Inspector:
 
     def __init__(self, name):
         self.name = name
-        print(f"{' ' * Inspector.indent}parsing {name}")
+        Inspector.pprint(f"parsing {name}")
         Inspector.indent += 2
 
     def __del__(self):
         Inspector.indent -= 2
-        print(f"{' ' * Inspector.indent}parsed {self.name}")
+        Inspector.pprint(f"parsed {self.name}")
+
+    def pprint(s: Any, /, *args, **kwargs):
+        """Print at the current indentation level."""
+        print(f"{' ' * Inspector.indent}{s}", *args, **kwargs)
 
 
 class Parser:
@@ -72,7 +78,7 @@ class Parser:
         t = self.peek()
         if t is None:
             raise ParseError("Reached the EOF too early.")
-        print(f"popped {self.tokens[-1]}")
+        Inspector.pprint(f"popped {self.tokens[-1]}")
         self.tokens.pop()
         return t
 
