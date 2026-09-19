@@ -24,9 +24,11 @@ from smol.front.ast import (
     BOp,
     Const,
     Expr,
+    If,
     Negate,
     Print,
     Program,
+    Read,
     Stmt,
     Var,
 )
@@ -48,6 +50,9 @@ def parse(source: str) -> Program:
     return program
 
 
+_DEBUG = False
+
+
 class Inspector:
     indent: int = 0
 
@@ -62,7 +67,17 @@ class Inspector:
 
     def pprint(s: Any, /, *args, **kwargs):
         """Print at the current indentation level."""
-        print(f"{' ' * Inspector.indent}{s}", *args, **kwargs)
+        if _DEBUG:
+            print(f"{' ' * Inspector.indent}{s}", *args, **kwargs)
+
+
+_BINOP_MAP = {
+    TokenKind.MUL: BOp.MUL,
+    TokenKind.DIV: BOp.DIV,
+    TokenKind.PLUS: BOp.ADD,
+    TokenKind.MINUS: BOp.SUB,
+    TokenKind.LT: BOp.LT,
+}
 
 
 class Parser:
@@ -117,18 +132,26 @@ class Parser:
         if t.kind == TokenKind.PRINT:
             return Print(self.parse_expr())
         if t.kind == TokenKind.READ:
-            ...
+            return Read(self.expect(TokenKind.ID).text)
         if t.kind == TokenKind.IF:
-            ...
+            guard = self.parse_expr()
+            true = self.parse_block()
+            false = self.parse_block()
+            return If(guard, true, false)
         raise ParseError(f"Expected the start of a statement, got {t}")
 
-    def parse_block(self) -> tuple[Stmt, ...]:
-        raise NotImplementedError("TODO: parse a block")
+    def parse_block(self) -> list[Stmt]:
+        self.expect(TokenKind.LBRACE)
+        stmts = []
+        while not self.eat(TokenKind.RBRACE):
+            stmts.append(self.parse_stmt())
+        return stmts
 
     def parse_expr(self) -> Expr:
         _dbg = Inspector("expr")
-        if self.peek() in [TokenKind.ID, TokenKind.NUM, TokenKind.TILDE]:
-            t = self.next()
+        t = self.peek()
+        if t and t.kind in [TokenKind.ID, TokenKind.NUM, TokenKind.TILDE]:
+            self.next()
             if t.kind == TokenKind.ID:
                 return Var(name=t.text)
             if t.kind == TokenKind.NUM:
@@ -144,7 +167,10 @@ class Parser:
 
     def parse_bop(self) -> BOp:
         _dbg = Inspector("bop")
-        if self.eat(TokenKind.PLUS):
-            return BOp.ADD
-        self.expect(TokenKind.MUL)
-        return BOp.MUL
+        # here, we know we must consume a token and we use a look-up table to
+        # figure out what to return. This is more compact than a chain of if
+        # statements.
+        t = self.next()
+        if t.kind not in _BINOP_MAP:
+            raise ParseError(f"Expected a binary operator, got {t}")
+        return _BINOP_MAP[t.kind]
