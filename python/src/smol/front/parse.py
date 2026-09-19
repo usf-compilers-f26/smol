@@ -16,7 +16,18 @@
 
 """Recursive-descent parser for smol's prefix grammar."""
 
-from smol.front.ast import BOp, Expr, Program, Stmt, Assign, Print, Var, Const, BinOp, Negate
+from smol.front.ast import (
+    Assign,
+    BinOp,
+    BOp,
+    Const,
+    Expr,
+    Negate,
+    Print,
+    Program,
+    Stmt,
+    Var,
+)
 from smol.front.lex import Token, TokenKind, get_tokens
 
 
@@ -33,6 +44,7 @@ def parse(source: str) -> Program:
             "There are still leftover tokens after reading a whole program."
         )
     return program
+
 
 class Inspector:
     indent: int = 0
@@ -117,7 +129,7 @@ class Parser:
                 return Const(value=int(t.text))
             if t.kind == TokenKind.TILDE:
                 return Negate(self.parse_expr())
-        
+
         # this must be a bop
         op = self.parse_bop()
         lhs = self.parse_expr()
@@ -130,4 +142,3 @@ class Parser:
             return BOp.ADD
         self.expect(TokenKind.MUL)
         return BOp.MUL
-        

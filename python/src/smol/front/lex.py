@@ -92,21 +92,21 @@ class Lexer:
             return None
 
         matches = [
-                (regex.match(self.source, self.pos), kind)
-                for regex, kind in self._matchers
+            (regex.match(self.source, self.pos), kind) for regex, kind in self._matchers
         ]
 
         matches = [
-                (len(match.group()), kind, match.group())
-                for match, kind in matches
-                if match
+            (len(match.group()), kind, match.group())
+            for match, kind in matches
+            if match
         ]
 
         matches.sort(reverse=True)
 
         if matches != []:
-            self.pos +=  matches[0][0]
+            self.pos += matches[0][0]
             return Token(kind=matches[0][1], text=matches[0][2])
+
 
 def get_tokens(source: str) -> list[Token]:
     lexer = Lexer(source)
