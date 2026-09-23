@@ -7,6 +7,7 @@ dependencies = []
 
 [project.scripts]
 smol = "smol.cli:main"
+vm = "smol.vm_cli:main"
 
 [dependency-groups]
 dev = [
