@@ -23,37 +23,37 @@ from smol.middle import tir
 
 
 @dataclass(frozen=True, slots=True)
-class _Label:
+class Label:
     name: str
 
 
 @dataclass(frozen=True, slots=True)
-class _Inner:
+class Inner:
     instruction: tir.Instruction
 
 
 @dataclass(frozen=True, slots=True)
-class _Term:
+class Term:
     terminator: tir.Terminator
 
 
-type _TvEntry = _Label | _Inner | _Term
+type TvEntry = Label | Inner | Term
 
 
 def lower(program: ast.Program) -> tir.Program:
-    return _Lower().lower_program(program)
+    return Lower().lower_program(program)
 
 
-def construct_cfg(entries: list[_TvEntry]) -> dict[str, tir.Block]:
+def construct_cfg(entries: list[TvEntry]) -> dict[str, tir.Block]:
     """Convert a translation vector into a basic-block map."""
     del entries
     raise NotImplementedError("TODO: construct the control-flow graph")
 
 
-class _Lower:
+class Lower:
     def __init__(self) -> None:
         self.declarations: set[str] = set()
-        self.translation: list[_TvEntry] = []
+        self.translation: list[TvEntry] = []
         self.fresh_counter = 0
         self.block_counter = 0
 
@@ -61,10 +61,10 @@ class _Lower:
         self.declarations.add(name)
 
     def lower_program(self, program: ast.Program) -> tir.Program:
-        self.translation.append(_Label("entry"))
+        self.translation.append(Label("entry"))
         for statement in program.statements:
             self.lower_stmt(statement)
-        self.translation.append(_Term(tir.Exit()))
+        self.translation.append(Term(tir.Exit()))
         return tir.Program(
             declarations=frozenset(self.declarations),
             blocks=construct_cfg(self.translation),
