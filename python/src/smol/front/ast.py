@@ -21,11 +21,11 @@ from enum import StrEnum
 
 
 class BOp(StrEnum):
-    MUL = "mul"
-    DIV = "div"
-    ADD = "add"
-    SUB = "sub"
-    LT = "lt"
+    MUL = "*"
+    DIV = "/"
+    ADD = "+"
+    SUB = "-"
+    LT = "<"
 
 
 @dataclass(frozen=True, slots=True)
